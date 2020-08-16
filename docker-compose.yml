@@ -1,8 +1,12 @@
 version: "3.4"
 
 volumes:
-  node_modules:
-    driver: local
+    node_modules:
+        driver: local
+    pg_data:
+        driver: local
+    pgadmin:
+        driver: local
 
 services:
 
@@ -23,12 +27,11 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - artisan
+      - migrate-fresh
     restart: unless-stopped
 
   server:
     image: nginx:stable-alpine
-    container_name: nginx
     ports:
       - "8080:80"
     volumes:
@@ -36,63 +39,78 @@ services:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - php
-      - mysql
+      - postgres
       - npm
 
-  mysql:
-    image: mysql:5.7.29
-    container_name: mysql
-    restart: unless-stopped
-    tty: true
-    ports:
-      - "3306:3306"
+  postgres:
+    image: postgres
     environment:
-      MYSQL_DATABASE: homestead
-      MYSQL_USER: homestead
-      MYSQL_PASSWORD: secret
-      MYSQL_ROOT_PASSWORD: secret
-      SERVICE_TAGS: dev
-      SERVICE_NAME: mysql
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+        POSTGRES_DB: postgres
+    volumes:
+      - pg_data:/var/lib/postgresql/data/
+    restart: unless-stopped
+    ports:
+        - 5432:5432
 
   php:
-    build:
-      context: .
-      dockerfile: php.Dockerfile
-    container_name: php
+    build: ./uslugi-svr
     volumes:
       - ./uslugi-svr:/var/www/html
     ports:
       - "9000:9000"
+    env_file: ./uslugi-svr/.env.example
     restart: unless-stopped
 
   composer:
     image: composer:latest
-    container_name: composer
     volumes:
       - ./uslugi-svr:/var/www/html
     working_dir: /var/www/html
+    env_file: ./uslugi-svr/.env.example
     entrypoint: ['composer', 'install']
     restart: on-failure
 
   npm:
     image: node:13.7
-    container_name: npm
     volumes:
       - ./uslugi-svr:/var/www/html
     working_dir: /var/www/html
     entrypoint: ['npm', 'install']
     restart: on-failure
 
-  artisan:
-    build:
-      context: ./uslugi-svr
-      dockerfile: php.Dockerfile
-    container_name: artisan
+  migrate-fresh:
+    build: ./uslugi-svr
     volumes:
       - ./uslugi-svr:/var/www/html
     depends_on:
-      - mysql
+      - postgres
       - composer
     working_dir: /var/www/html
-    entrypoint: ['php', '/var/www/html/artisan', 'migrate:fresh']
+    env_file: ./uslugi-svr/.env.example
+    entrypoint: ['php', '/var/www/html/artisan', 'migrate:fresh', '--force']
     restart: on-failure
+
+  artisan:
+    build: ./uslugi-svr
+    volumes:
+      - ./uslugi-svr:/var/www/html
+    depends_on:
+      - postgres
+      - composer
+    working_dir: /var/www/html
+    env_file: ./uslugi-svr/.env.example
+    entrypoint: ['php', '/var/www/html/artisan']
+    restart: 'no'
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pg@admin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+    volumes:
+       - pgadmin:/root/.pgadmin
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    restart: unless-stopped
