@@ -11,6 +11,7 @@ services:
     ports:
       - 1025:1025 # smtp server
       - 8025:8025 # web ui
+    restart: unless-stopped
 
   front:
     build: ./uslugi-front
@@ -21,6 +22,9 @@ services:
       - node_modules:/app/frontend/node_modules
     ports:
       - "3000:3000"
+    depends_on:
+      - artisan
+    restart: unless-stopped
 
   server:
     image: nginx:stable-alpine
@@ -33,6 +37,7 @@ services:
     depends_on:
       - php
       - mysql
+      - npm
 
   mysql:
     image: mysql:5.7.29
@@ -58,6 +63,7 @@ services:
       - ./uslugi-svr:/var/www/html
     ports:
       - "9000:9000"
+    restart: unless-stopped
 
   composer:
     image: composer:latest
@@ -66,6 +72,7 @@ services:
       - ./uslugi-svr:/var/www/html
     working_dir: /var/www/html
     entrypoint: ['composer', 'install']
+    restart: on-failure
 
   npm:
     image: node:13.7
@@ -74,3 +81,18 @@ services:
       - ./uslugi-svr:/var/www/html
     working_dir: /var/www/html
     entrypoint: ['npm', 'install']
+    restart: on-failure
+
+  artisan:
+    build:
+      context: ./uslugi-svr
+      dockerfile: php.Dockerfile
+    container_name: artisan
+    volumes:
+      - ./uslugi-svr:/var/www/html
+    depends_on:
+      - mysql
+      - composer
+    working_dir: /var/www/html
+    entrypoint: ['php', '/var/www/html/artisan', 'migrate:fresh']
+    restart: on-failure
