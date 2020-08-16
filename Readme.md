@@ -3,21 +3,22 @@
 Состав приложения:
   - mailhog
   - nginx
-  - php7.1
+  - php (7.1)
   - laravel
   - react.js
 
+### Запуск
+
 Для запуска приложения необходим Docker и docker-compose.
 
-```
-cd uslugi-demo
-docker-compose up -d
-```
+    $ cd uslugi-demo
+    $ (cd uslugi-svr && cp .env.example .env)
+    $ docker-compose up -d
 
 Время сборки: 5-7 минут
 
-Приложение запустится на порту **3000** (front),
-API (Laravel) работает на порту **8080** (здесь нет страниц, только REST APIs)
+Приложение отвечает на порту **3000** (front),
+API (Laravel) на порту **8080** (здесь нет страниц, только REST APIs)
 
 ### Использование
 
