@@ -1,8 +1,6 @@
 version: "3.4"
 
 volumes:
-    node_modules:
-        driver: local
     pg_data:
         driver: local
     pgadmin:
@@ -23,7 +21,6 @@ services:
     stdin_open: true
     volumes:
       - ./uslugi-front:/app/frontend
-      - node_modules:/app/frontend/node_modules
     ports:
       - "3000:3000"
     depends_on:
