@@ -18,12 +18,18 @@ class UserviceTables extends Migration
         Schema::create('u_service_category', function (Blueprint $table) {
             $table->bigIncrements('id');
 
+            $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP'));
+
             $table->string('title');
             $table->string('css_color');
         });
 
         Schema::create('u_service', function (Blueprint $table) {
             $table->bigIncrements('id');
+
+            $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP'));
 
             $table->string('title');
             $table->string('description');
@@ -35,23 +41,22 @@ class UserviceTables extends Migration
 
             $table->integer('min_days');
             $table->integer('max_days');
-        });
 
-        Schema::table('u_service', function (Blueprint $table) {
             $table->foreign('category_id')->references('id')->on('u_service_category');
         });
 
         Schema::create('u_service_request', function (Blueprint $table) {
             $table->bigIncrements('id');
 
+            $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP'));
+
             $table->string('user_text');
 
             $table->integer('status');
             $table->integer('service_id');
             $table->integer('user_id');
-        });
 
-        Schema::table('u_service_request', function (Blueprint $table) {
             $table->foreign('service_id')->references('id')->on('u_service');
             $table->foreign('user_id')->references('id')->on('user');
         });

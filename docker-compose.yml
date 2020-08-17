@@ -27,7 +27,7 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - migrate-fresh
+      - init
     restart: unless-stopped
 
   server:
@@ -61,6 +61,8 @@ services:
     ports:
       - "9000:9000"
     env_file: ./uslugi-svr/.env.example
+    depends_on:
+        - init
     restart: unless-stopped
 
   composer:
@@ -80,17 +82,18 @@ services:
     entrypoint: ['npm', 'install']
     restart: on-failure
 
-  migrate-fresh:
+  init:
     build: ./uslugi-svr
     volumes:
       - ./uslugi-svr:/var/www/html
+      - ./:/init
     depends_on:
       - postgres
       - composer
     working_dir: /var/www/html
     env_file: ./uslugi-svr/.env.example
-    entrypoint: ['php', '/var/www/html/artisan', 'migrate:fresh', '--force']
-    restart: on-failure
+    command: ['sh', '/init/init.sh']
+    restart: 'no'
 
   artisan:
     build: ./uslugi-svr

@@ -33,4 +33,5 @@ API (Laravel) на порту **8080** (здесь нет страниц, тол
 NOTE: При перезапуске compose данные стираются (migrate:fresh)
 
 Доступ к pgadmin: [http://localhost:5050](http://localhost:5050)
+
 - pg@admin.org:admin

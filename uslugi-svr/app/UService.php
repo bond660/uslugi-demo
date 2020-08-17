@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\UServiceCategory;
 
 class UService extends Model
 {
@@ -14,4 +15,9 @@ class UService extends Model
       'fa_icon', 'is_off',
       'min_days', 'max_days',
     ];
+
+    public function category()
+    {
+        return $this->hasOne(UServiceCategory::class, 'id', 'category_id');
+    }
 }
