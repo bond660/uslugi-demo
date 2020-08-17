@@ -60,7 +60,6 @@ services:
       - ./uslugi-svr:/var/www/html
     ports:
       - "9000:9000"
-    env_file: ./uslugi-svr/.env.example
     depends_on:
         - init
     restart: unless-stopped
@@ -70,7 +69,6 @@ services:
     volumes:
       - ./uslugi-svr:/var/www/html
     working_dir: /var/www/html
-    env_file: ./uslugi-svr/.env.example
     entrypoint: ['composer', 'install']
     restart: on-failure
 
@@ -103,7 +101,6 @@ services:
       - postgres
       - composer
     working_dir: /var/www/html
-    env_file: ./uslugi-svr/.env.example
     entrypoint: ['php', '/var/www/html/artisan']
     restart: 'no'
 
